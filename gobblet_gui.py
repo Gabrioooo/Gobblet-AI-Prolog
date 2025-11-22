@@ -126,6 +126,7 @@ class GobbletGUI:
         self.selected_btn = None
 
         self.create_widgets()
+        self.ask_who_starts()
         self.update_ui()
 
     def create_widgets(self):
@@ -175,6 +176,22 @@ class GobbletGUI:
             lbl = tk.Label(right_col, text="B", font=("Arial", 12), bg="#ccc", width=6, relief="sunken", pady=4)
             lbl.pack(pady=2) # Spaziatura verticale
             self.hand_labels_b.append(lbl)
+
+    def ask_who_starts(self):
+        # Chiede all'utente se vuole iniziare
+        # True = Inizia l'Umano (Bianco), False = Inizia l'AI (Nero)
+        user_starts = messagebox.askyesno("Chi inizia?", "Vuoi fare la prima mossa?\n(Sì = Tu, No = AI)")
+        
+        if user_starts:
+            self.turn = 'w'
+            self.lbl_status.config(text="Tocca a te (Bianco)", fg="blue")
+        else:
+            self.turn = 'b'
+            self.lbl_status.config(text="L'AI sta pensando...", fg="red")
+            
+            # IMPORTANTE: Se inizia l'AI, dobbiamo forzare il primo turno!
+            # Usiamo .after per dare tempo alla finestra di aprirsi completamente
+            self.root.after(500, self.ai_turn)            
 
     # --- LOGICA DI GIOCO E COMUNICAZIONE CON PROLOG ---
 
