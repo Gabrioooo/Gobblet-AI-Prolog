@@ -4,9 +4,9 @@ import sys
 import subprocess
 import re
 
-print("--- FIX FINALE PER GOBBLET ---")
 
-# 1. TROVA LA CONFIGURAZIONE REALE DI PROLOG
+
+
 try:
     output = subprocess.check_output(["swipl", "--dump-runtime-variables"]).decode("utf-8")
     config = {}
@@ -18,17 +18,13 @@ except Exception as e:
     print("ERRORE: Impossibile eseguire 'swipl'. Assicurati che sia installato.")
     sys.exit(1)
 
-plbase = config.get("PLBASE") # /opt/homebrew/Cellar/swi-prolog/9.2.9/lib/swipl
-plarch = config.get("PLARCH") # arm64-darwin
+plbase = config.get("PLBASE") 
+plarch = config.get("PLARCH") 
 
 print(f"PLBASE rilevata: {plbase}")
 
-# 2. CREA LA CARTELLA CHE MANCA (Quella dell'errore)
-# L'errore dice: .../lib/Frameworks
-# PLBASE è: .../lib/swipl
-# Quindi dobbiamo andare una cartella sopra PLBASE e creare Frameworks lì.
 
-parent_dir = os.path.dirname(plbase) # /opt/homebrew/Cellar/swi-prolog/9.2.9/lib
+parent_dir = os.path.dirname(plbase) 
 frameworks_missing = os.path.join(parent_dir, "Frameworks")
 
 print(f"Controllo esistenza cartella critica: {frameworks_missing}")
@@ -46,10 +42,8 @@ if not os.path.exists(frameworks_missing):
 else:
     print("La cartella esiste già.")
 
-# 3. TROVA E CARICA LA LIBRERIA
 lib_path = os.path.join(plbase, "lib", plarch, "libswipl.dylib")
 if not os.path.exists(lib_path):
-    # Fallback
     import glob
     found = glob.glob("/opt/homebrew/**/libswipl.dylib", recursive=True)
     if found:
@@ -57,11 +51,9 @@ if not os.path.exists(lib_path):
 
 print(f"Libreria dinamica: {lib_path}")
 
-# 4. SETTA L'AMBIENTE
 os.environ["SWI_HOME_DIR"] = plbase
 os.environ["PLBASE"] = plbase
 
-# 5. AVVIO
 try:
     ctypes.CDLL(lib_path)
     from pyswip import Prolog
